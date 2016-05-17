@@ -1,7 +1,7 @@
-﻿/* Author: John R. McLaren
+/* Author: John R. McLaren
  * Acknowledgement: Iwan Tjin for providing steps towards constructing this application
  * Created: 28/4/2016
- * Rev: 2.2.0
+ * Rev: 2.2.1
  * 
  * Form Source Code, child of Snake.sln
  * Handles form logic
@@ -147,63 +147,7 @@ namespace Snake
             MessageBox.Show("You are a master of Snake. Few can match your skill and quick wit. Congratulations. You have completed the game.", "You Win!");
         }
 
-        private void DisplayScores()
-        {
-            string fileName = "Scores.txt"; // name of saved file
-            string fullPath = Path.GetFullPath(fileName); // find the path to the saved file
-
-            try
-            {
-                using (StreamReader sr = File.OpenText(fullPath))
-                {
-                    string[] scoresByLine = File.ReadAllLines(fullPath);
-                    string allScores = "";
-
-                    for (int i = 0; i < scoresByLine.Length; i++)
-                    {
-                        allScores += scoresByLine[i] + "\n";
-                    }
-                    MessageBox.Show(allScores, "Previous Scores");
-                }
-            }
-            catch
-            {
-                Console.WriteLine("ERROR: Filepath Could Not Be Located Or Read");
-            }
-        }
-
-        // when called saves score to a text file, if file not present creates new file (default save location is /visualstudio2015/bin)
-        private void SaveScore()
-        {
-            try
-            {
-                string fileName = "Scores.txt";
-                string fullPath = Path.GetFullPath(fileName);
-                if (!File.Exists(fullPath)) // if the file does not exist
-                {
-                    using (StreamWriter writerCreate = File.CreateText(fullPath))
-                    {
-                        Console.WriteLine("File Successfully Created At Location: " + fullPath);
-                        writerCreate.WriteLine(string.Format("Score: {0} Points. {1}", settings.Score, DateTime.Now)); // create file and add score
-                        writerCreate.Close(); // release resource
-                    }
-                }
-                else
-                {
-                    using (StreamWriter writerAdd = File.AppendText(fullPath))
-                    {
-                        writerAdd.WriteLine(string.Format("Score: {0} Points. {1}", settings.Score, DateTime.Now)); // add new score to file
-                        writerAdd.Close();
-                    }
-                }
-            }
-            catch
-            {
-                Console.WriteLine("ERROR: Filepath Could Not Be Located Or Created");
-            }
-        }
-
-        // changes score label to score value
+        // changes score labels to score values
         private void UpdateScore()
         {
             lblScore.Text = "Score: " + settings.Score;
@@ -363,6 +307,63 @@ namespace Snake
                 {
                     btn.ForeColor = settings.customColor;
                 }
+            }
+        }
+
+        private void DisplayScores()
+        {
+            string fileName = "Scores.txt"; // name of saved file
+            string fullPath = Path.GetFullPath(fileName); // find the path to the saved file
+
+            try
+            {
+                using (StreamReader reader = File.OpenText(fullPath))
+                {
+                    string[] scoresByLine = File.ReadAllLines(fullPath);
+                    string allScores = "";
+
+                    for (int i = 0; i < scoresByLine.Length && i < 10; i++)
+                    {
+                        allScores += scoresByLine[i] + "\n";
+                    }
+                    MessageBox.Show(allScores, "Previous Scores");
+                }
+            }
+            catch
+            {
+                Console.WriteLine("ERROR: Filepath Could Not Be Located Or Read");
+            }
+        }
+
+        // saves score to a text file, if file not present creates new file (default save location is /visualstudio2015/bin)
+        private void SaveScore()
+        {
+            try
+            {
+                string fileName = "Scores.txt";
+                string fullPath = Path.GetFullPath(fileName);
+                if (!File.Exists(fullPath)) // if the file does not exist
+                {
+                    using (StreamWriter writerCreate = File.CreateText(fullPath)) // create a new file
+                    {
+                        Console.WriteLine("File Successfully Created At Location: " + fullPath);
+                        writerCreate.WriteLine(string.Format("1. Score: {0} Points. {1}", settings.Score, DateTime.Now.ToShortDateString())); // create file and add score
+                        writerCreate.Close(); // release resource
+                    }
+                }
+                else // add new score to file
+                {
+                    string[] scoresByLine = File.ReadAllLines(fullPath);
+                    using (StreamWriter writerAdd = File.AppendText(fullPath))
+                    {
+                        writerAdd.WriteLine(string.Format("{0}. Score: {1} Points. {2}", scoresByLine.Length + 1, settings.Score, DateTime.Now.ToShortDateString()));
+                        writerAdd.Close();
+                    }
+                }
+            }
+            catch
+            {
+                Console.WriteLine("ERROR: Filepath Could Not Be Located Or Created");
             }
         }
     }
