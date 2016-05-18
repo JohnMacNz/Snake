@@ -1,7 +1,7 @@
 /* Author: John R. McLaren
  * Acknowledgement: Iwan Tjin for providing steps towards constructing this application
  * Created: 28/4/2016
- * Rev: 2.2.1
+ * Rev: 2.2.2
  * 
  * Form Source Code, child of Snake.sln
  * Handles form logic
@@ -17,25 +17,25 @@ namespace Snake
 {
     public partial class Form : System.Windows.Forms.Form
     {   
-        // class objects
+        // Class Objects
         List<Point> snakeCoords = new List<Point>();
         List<Point> appleCoords = new List<Point>();
-        Settings settings = new Settings();
+        Settings Settings = new Settings();
         Random rng = new Random();
-        Shape shapes = new Shape();
-        Snake snake = new Snake();
-        Apple apple = new Apple();
-        Grid grid = new Grid();
+        Shape Shapes = new Shape();
+        Snake Snake = new Snake();
+        Apple Apple = new Apple();
+        Grid Grid = new Grid();
 
-        // form constructor
+        // Form constructor
         public Form()
         {
-            string[] args = Environment.GetCommandLineArgs(); // store input (if any) during execution
+            string[] args = Environment.GetCommandLineArgs(); // gets an input (if any) before execution
             try
             {
-                if (int.Parse(args[1]) < 8)
+                if (int.Parse(args[1]) < 8) // input less than 8
                 {
-                    int.TryParse(args[1], out settings.Difficulty);
+                    int.TryParse(args[1], out Settings.Difficulty); // set difficulty of game to input
                 }
                 else
                 {
@@ -46,15 +46,15 @@ namespace Snake
             {
                 Console.WriteLine("No input found. Program will run as default.");
             }
-            InitializeComponent();
+            InitializeComponent(); // load the form
         }
 
-        // start button events
-        private void btnStart_Click(object sender, EventArgs e)
+        // Start button events
+        private void SelectStartButton(object sender, EventArgs e)
         {
-            if (settings.GameStarted == false)
+            if (Settings.GameStarted == false)
             {
-                settings.GameStarted = true;
+                Settings.GameStarted = true;
                 StartGame();
             }
             else
@@ -64,25 +64,25 @@ namespace Snake
         }
 
         // score button events
-        private void btnScores_Click(object sender, EventArgs e)
+        private void SelectScoreButton(object sender, EventArgs e)
         {
             DisplayScores();
         }
 
         // timer events
-        private void tmrClock_Tick(object sender, EventArgs e)
+        private void OnTimerTick(object sender, EventArgs e)
         {
-            tmrClock.Interval = 105 - (5 * settings.Difficulty);
-            settings.KeyPressed = false;
+            tmrClock.Interval = 105 - (5 * Settings.Difficulty);
+            Settings.KeyPressed = false;
             UpdateForm();
         }
 
         private void StartGame()
         {
             // initialise variables
-            settings.Direction = "up";
-            settings.customColor = Color.Lime;
-            settings.Score = 0;
+            Settings.Direction = "up";
+            Settings.Color = Color.Lime;
+            Settings.Score = 0;
 
             //set form properties
             btnStart.Text = "New Game";
@@ -93,9 +93,9 @@ namespace Snake
             changeColors();
 
             // call methods
-            grid.GenerateGrid(picBoxCanvas, Color.FromArgb(32, 32, 32), settings.customColor, true, true);
+            Grid.Generate(picBoxCanvas, Color.FromArgb(32, 32, 32), Settings.Color, true, true);
             GenerateSnake();
-            apple.GenerateApple(appleCoords, snakeCoords, picBoxCanvas);
+            Apple.Generate(appleCoords, snakeCoords, picBoxCanvas);
             tmrClock.Start();
         }
 
@@ -107,7 +107,7 @@ namespace Snake
             appleCoords.Clear();
 
             // restart game
-            settings.Difficulty = 1;
+            Settings.Difficulty = 1;
             StartGame();
             UpdateScore();
         }
@@ -120,7 +120,7 @@ namespace Snake
             btnStart.Show();
             snakeCoords.Clear();
             appleCoords.Clear();
-            grid.GenerateGrid(picBoxCanvas, Color.FromArgb(32, 32, 32), settings.customColor, true, true);
+            Grid.Generate(picBoxCanvas, Color.FromArgb(32, 32, 32), Settings.Color, true, true);
         }
 
         private void LoseGame()
@@ -150,8 +150,8 @@ namespace Snake
         // changes score labels to score values
         private void UpdateScore()
         {
-            lblScore.Text = "Score: " + settings.Score;
-            lblLevel.Text = "Level " + settings.Difficulty;
+            lblScore.Text = "Score: " + Settings.Score;
+            lblLevel.Text = "Level " + Settings.Difficulty;
         }
 
         // snake movement logic
@@ -159,47 +159,47 @@ namespace Snake
         {
             Point snakeHead = snakeCoords[snakeCoords.Count - 1];
 
-            // move snake first
-            if (apple.HitApple(snakeHead.X, snakeHead.Y, appleCoords) == true) // if snake head coords same as apple coords
+            // a) move snake first
+            if (Apple.Hit(snakeHead.X, snakeHead.Y, appleCoords) == true) // if snake hits apple
             {
                 appleCoords.RemoveAt(appleCoords.Count - 1);
-                snake.GrowSnake(settings.Direction, picBoxCanvas, snakeCoords, settings.customColor);
-                apple.GenerateApple(appleCoords, snakeCoords, picBoxCanvas);
-                settings.Score++;
+                Snake.Grow(Settings.Direction, picBoxCanvas, snakeCoords, Settings.Color);
+                Apple.Generate(appleCoords, snakeCoords, picBoxCanvas);
+                Settings.Score++;
 
-                if (settings.Score % 10 == 0 && settings.Score != 0) // and if score multiple of 10 and not 0
+                if (Settings.Score % 10 == 0 && Settings.Score != 0) // and if score multiple of 10
                 {
-                    // increase difficulty (snake gains energy boost from eating many apples)
-                    settings.Difficulty++;
+                    // increase difficulty (snake gains energy boost from eating a certain amount of apples)
+                    Settings.Difficulty++;
 
-                    switch (settings.Difficulty)
+                    switch (Settings.Difficulty)
                     {
                         case 1:
-                            settings.customColor = Color.Lime;
+                            Settings.Color = Color.Lime;
                             break;
                         case 2:
-                            settings.customColor = Color.Cyan;
+                            Settings.Color = Color.Cyan;
                             break;
                         case 3:
-                            settings.customColor = Color.DeepSkyBlue;
+                            Settings.Color = Color.DeepSkyBlue;
                             break;
                         case 4:
-                            settings.customColor = Color.Magenta;
+                            Settings.Color = Color.Magenta;
                             break;
                         case 5:
-                            settings.customColor = Color.Yellow;
+                            Settings.Color = Color.Yellow;
                             break;
                         case 6:
-                            settings.customColor = Color.Orange;
+                            Settings.Color = Color.Orange;
                             break;
                         case 7:
-                            settings.customColor = Color.Red;
+                            Settings.Color = Color.Red;
                             break;
                         case 8:
                             WinGame();
                             break;
                         default:
-                            settings.customColor = Color.Lime;
+                            Settings.Color = Color.Lime;
                             break;
                     }
                     changeColors();
@@ -207,10 +207,10 @@ namespace Snake
             }
             else
             {
-                snake.MoveSnake(settings.Direction, picBoxCanvas, snakeCoords, settings.customColor);
+                Snake.Move(Settings.Direction, picBoxCanvas, snakeCoords, Settings.Color);
             }
 
-            // then check for collisions
+            // b) then check for collisions
             if (CheckCollisions(snakeHead.X, snakeHead.Y) == true)
             {
                 LoseGame();
@@ -218,26 +218,26 @@ namespace Snake
             UpdateScore();
         }
 
-        // default snake location and size
+        // creates a default snake location and size
         private void GenerateSnake()
         {
             for (int i = 0; i < 3; i++)
             {
-                snakeCoords.Add(new Point(grid.SquareSize * grid.GridSize / 2, grid.SquareSize * grid.GridSize / 2 + grid.SquareSize * i)); // generate in the middle
+                snakeCoords.Add(new Point(Grid.SquareSize * Grid.GridSize / 2, Grid.SquareSize * Grid.GridSize / 2 + Grid.SquareSize * i)); // generate in the middle
             }
         }
 
-        // collision condition check
+        // collision conditions
         private bool CheckCollisions(int hitX, int hitY)
         {
-            if (hitX < 0 || hitX >= grid.SquareSize * grid.GridSize || hitY < 0 || hitY >= grid.SquareSize * grid.GridSize) // if hit the wall
+            if (hitX < 0 || hitX >= Grid.SquareSize * Grid.GridSize || hitY < 0 || hitY >= Grid.SquareSize * Grid.GridSize) // hit the wall
             {
                 return true;
             }
 
             for (int i = 0; i < snakeCoords.Count - 2; i++) // loop for each list segment except head
             {
-                if (hitX == snakeCoords[i].X && hitY == snakeCoords[i].Y) // if head point same as segment point there is a collision
+                if (hitX == snakeCoords[i].X && hitY == snakeCoords[i].Y) // hit itself
                 {
                     return true;
                 }
@@ -248,36 +248,36 @@ namespace Snake
         // movement key settings
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            if (settings.KeyPressed == false) // to prevent double movement we read only one action per tick to avoid snake inverting in on itself
+            if (Settings.KeyPressed == false) // to prevent double movement we get only one action per tick to avoid snake inverting in on itself
             {
                 switch (keyData)
                 {
                     case Keys.Up:
-                        if (settings.Direction != "down")
+                        if (Settings.Direction != "down")
                         {
-                            settings.Direction = "up";
-                            settings.KeyPressed = true;
+                            Settings.Direction = "up";
+                            Settings.KeyPressed = true;
                         }
                         break;
                     case Keys.Down:
-                        if (settings.Direction != "up")
+                        if (Settings.Direction != "up")
                         {
-                            settings.Direction = "down";
-                            settings.KeyPressed = true;
+                            Settings.Direction = "down";
+                            Settings.KeyPressed = true;
                         }
                         break;
                     case Keys.Left:
-                        if (settings.Direction != "right")
+                        if (Settings.Direction != "right")
                         {
-                            settings.Direction = "left";
-                            settings.KeyPressed = true;
+                            Settings.Direction = "left";
+                            Settings.KeyPressed = true;
                         }
                         break;
                     case Keys.Right:
-                        if (settings.Direction != "left")
+                        if (Settings.Direction != "left")
                         {
-                            settings.Direction = "right";
-                            settings.KeyPressed = true;
+                            Settings.Direction = "right";
+                            Settings.KeyPressed = true;
                         }
                         break;
                 }
@@ -288,11 +288,12 @@ namespace Snake
         private void changeColors()
         {
             // change grid colour
-            grid.GenerateGrid(picBoxCanvas, Color.FromArgb(32, 32, 32), settings.customColor, true, false);
+            Grid.Generate(picBoxCanvas, Color.FromArgb(32, 32, 32), Settings.Color, true, false);
+
             //change snake colour
             for (int i = 0; i < snakeCoords.Count - 1; i++)
             {
-                shapes.DrawSolidSquare(picBoxCanvas, snakeCoords[i].X, snakeCoords[i].Y, grid.SquareSize, settings.customColor);
+                Shapes.DrawSolidSquare(picBoxCanvas, snakeCoords[i].X, snakeCoords[i].Y, Grid.SquareSize, Settings.Color);
             }
             //change button and label colours
             foreach (Control c in Controls)
@@ -301,11 +302,11 @@ namespace Snake
                 Button btn = c as Button;
                 if (lbl != null) // if exist
                 {
-                    lbl.ForeColor = settings.customColor; // set to visible
+                    lbl.ForeColor = Settings.Color; // set to visible
                 }
                 if (btn != null)
                 {
-                    btn.ForeColor = settings.customColor;
+                    btn.ForeColor = Settings.Color;
                 }
             }
         }
@@ -313,11 +314,11 @@ namespace Snake
         private void DisplayScores()
         {
             string fileName = "Scores.txt"; // name of saved file
-            string fullPath = Path.GetFullPath(fileName); // find the path to the saved file
+            string fullPath = Path.GetFullPath(fileName); // the path to the saved file
 
             try
             {
-                using (StreamReader reader = File.OpenText(fullPath))
+                using (StreamReader ReadFile = File.OpenText(fullPath))
                 {
                     string[] scoresByLine = File.ReadAllLines(fullPath);
                     string allScores = "";
@@ -344,20 +345,20 @@ namespace Snake
                 string fullPath = Path.GetFullPath(fileName);
                 if (!File.Exists(fullPath)) // if the file does not exist
                 {
-                    using (StreamWriter writerCreate = File.CreateText(fullPath)) // create a new file
+                    using (StreamWriter NewFile = File.CreateText(fullPath)) // create a new file
                     {
                         Console.WriteLine("File Successfully Created At Location: " + fullPath);
-                        writerCreate.WriteLine(string.Format("1. Score: {0} Points. {1}", settings.Score, DateTime.Now.ToShortDateString())); // create file and add score
-                        writerCreate.Close(); // release resource
+                        NewFile.WriteLine(string.Format("1. Score: {0} Points. {1}", Settings.Score, DateTime.Now.ToShortDateString())); // create file and add score
+                        NewFile.Close(); // release resource
                     }
                 }
                 else // add new score to file
                 {
                     string[] scoresByLine = File.ReadAllLines(fullPath);
-                    using (StreamWriter writerAdd = File.AppendText(fullPath))
+                    using (StreamWriter AddToFile = File.AppendText(fullPath))
                     {
-                        writerAdd.WriteLine(string.Format("{0}. Score: {1} Points. {2}", scoresByLine.Length + 1, settings.Score, DateTime.Now.ToShortDateString()));
-                        writerAdd.Close();
+                        AddToFile.WriteLine(string.Format("{0}. Score: {1} Points. {2}", scoresByLine.Length + 1, Settings.Score, DateTime.Now.ToShortDateString()));
+                        AddToFile.Close();
                     }
                 }
             }
